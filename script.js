@@ -302,6 +302,7 @@ async function submitOrder(e) {
   errorBox.style.display = "none";
 
   const order = {
+    id: crypto.randomUUID(),
     customer_name: document.getElementById("custName").value.trim(),
     phone: document.getElementById("custPhone").value.trim(),
     commune: document.getElementById("custCommune").value,
@@ -315,16 +316,14 @@ async function submitOrder(e) {
   submitBtn.textContent = "Envoi en cours...";
 
   try {
-    const { data: orderRow, error: orderError } = await supabaseClient
+    const { error: orderError } = await supabaseClient
       .from("orders")
-      .insert(order)
-      .select()
-      .single();
+      .insert(order);
 
     if (orderError) throw orderError;
 
     const items = state.cart.map(item => ({
-      order_id: orderRow.id,
+      order_id: order.id,
       product_id: item.id,
       product_name: item.name,
       unit_price: item.price,
