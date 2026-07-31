@@ -341,7 +341,7 @@ async function submitOrder(e) {
 
   } catch (err) {
     console.error(err);
-    errorBox.textContent = "Erreur lors de l'envoi de la commande. Réessaie ou contacte-nous directement sur WhatsApp.";
+    errorBox.textContent = "Erreur : " + (err.message || JSON.stringify(err));
     errorBox.style.display = "block";
     submitBtn.disabled = false;
     submitBtn.textContent = "Valider ma commande";
