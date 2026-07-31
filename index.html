@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Twist Pro Abidjan — Twists & accessoires capillaires</title>
+<meta name="description" content="Twists, mèches et accessoires capillaires livrés partout à Abidjan. Commande simple, paiement à la livraison par cash ou mobile.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="announce-bar">Livraison à Abidjan · Paiement à la livraison — cash ou mobile</div>
+
+<header class="site-header">
+  <div class="container">
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+    <div class="logo">Twist<span>Pro</span> Abidjan</div>
+    <div class="header-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Rechercher">🔍</button>
+      <button class="icon-btn cart-btn" id="cartBtn" aria-label="Panier">
+        🛒 <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </div>
+  <nav class="nav-drawer" id="navDrawer">
+    <a href="#produits">Catalogue</a>
+    <a href="#comment-ca-marche">Comment ça marche</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-watermark">Twist Pro</div>
+  <div class="container">
+    <div class="hero-text">
+      <div class="hero-eyebrow">Livraison à Abidjan</div>
+      <h1>Des <em>twists</em> qui tiennent la route, du choix qui tient la ville</h1>
+      <p>Mèches, twists prêts à poser et accessoires capillaires sélectionnés pour durer. Commande en ligne, paiement à la livraison par cash ou mobile, livré dans ta commune.</p>
+      <div class="hero-actions">
+        <a href="#produits" class="btn-primary">Voir le catalogue</a>
+        <a href="#comment-ca-marche" class="btn-secondary">Comment commander</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <svg class="spiral-deco" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="spiralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="var(--gold)"/>
+            <stop offset="100%" stop-color="var(--coral)"/>
+          </linearGradient>
+        </defs>
+        <path d="M100 20 C150 20 170 60 150 100 C130 140 70 140 60 100 C52 68 80 50 100 65 C115 76 110 95 95 95"
+          stroke="url(#spiralGradient)" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="twist-divider"></div>
+
+<section class="categories-bar">
+  <div class="container" id="categoryPills">
+    <button class="category-pill active" data-cat="tous">Tous</button>
+  </div>
+</section>
+
+<section class="products-section" id="produits">
+  <div class="container">
+    <h2 class="section-title">Le catalogue</h2>
+    <div class="products-grid" id="productsGrid">
+      <!-- Les produits sont injectés par script.js -->
+    </div>
+  </div>
+</section>
+
+<div class="twist-divider"></div>
+
+<section id="comment-ca-marche" class="products-section">
+  <div class="container">
+    <h2 class="section-title">Comment commander</h2>
+    <div class="products-grid" style="grid-template-columns: repeat(auto-fill, minmax(220px,1fr));">
+      <div class="product-card"><div class="product-info">
+        <div class="product-name">1. Choisis tes produits</div>
+        <p style="font-size:0.9rem;color:var(--ink);opacity:.72;">Ajoute au panier ce qu'il te faut, autant d'articles que tu veux.</p>
+      </div></div>
+      <div class="product-card"><div class="product-info">
+        <div class="product-name">2. Renseigne ta livraison</div>
+        <p style="font-size:0.9rem;color:var(--ink);opacity:.72;">Nom, téléphone, commune et un repère pour te trouver facilement.</p>
+      </div></div>
+      <div class="product-card"><div class="product-info">
+        <div class="product-name">3. Paye à la livraison</div>
+        <p style="font-size:0.9rem;color:var(--ink);opacity:.72;">En cash ou par Mobile Money (Orange, MTN, Moov, Wave) quand tu reçois ta commande.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer" id="contact">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">Twist Pro Abidjan</div>
+        <p style="opacity:0.85;font-size:0.9rem;max-width:280px;">Twists, mèches et accessoires capillaires livrés partout à Abidjan.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="https://wa.me/2250778993255" target="_blank">WhatsApp</a>
+        <a href="tel:+2250778993255">+225 07 78 99 32 55</a>
+      </div>
+      <div class="footer-col">
+        <h4>Livraison</h4>
+        <p>Toutes communes d'Abidjan</p>
+        <p>Paiement cash ou Mobile Money</p>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 Twist Pro Abidjan — Tous droits réservés</div>
+  </div>
+</footer>
+
+<a href="https://wa.me/2250778993255" class="whatsapp-float" target="_blank" aria-label="Contacter sur WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.79 14.07c-.24.68-1.4 1.3-1.93 1.38-.49.08-1.11.11-1.79-.11-.41-.13-.94-.31-1.62-.6-2.85-1.23-4.71-4.09-4.85-4.28-.14-.19-1.16-1.54-1.16-2.94 0-1.4.73-2.09.99-2.37.26-.28.57-.35.76-.35.19 0 .38 0 .55.01.18.01.41-.07.64.49.24.57.81 1.97.88 2.11.07.14.11.3.02.49-.09.19-.14.3-.28.46-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.17 1.52 1.9 1.05.94 1.93 1.23 2.21 1.37.28.14.44.12.6-.07.16-.19.68-.79.87-1.06.18-.28.37-.23.62-.14.26.09 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
+</a>
+
+<!-- ============================================
+     Panneau panier + tunnel de commande
+     ============================================ -->
+<div class="cart-overlay" id="cartOverlay"></div>
+
+<aside class="cart-panel" id="cartPanel">
+  <div class="cart-panel-header">
+    <h3 id="cartPanelTitle">Ton panier</h3>
+    <button class="cart-close" id="cartClose" aria-label="Fermer">✕</button>
+  </div>
+
+  <!-- Vue 1 : contenu du panier -->
+  <div class="cart-view" id="cartView">
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-empty" id="cartEmpty" style="display:none;">Ton panier est vide pour l'instant.</div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span id="cartTotal">0 FCFA</span>
+      </div>
+      <button class="btn-primary cart-checkout-btn" id="goToCheckout">Passer la commande</button>
+    </div>
+  </div>
+
+  <!-- Vue 2 : formulaire de livraison -->
+  <form class="cart-view checkout-view" id="checkoutView" style="display:none;">
+    <button type="button" class="checkout-back" id="checkoutBack">← Retour au panier</button>
+
+    <label>Nom complet
+      <input type="text" id="custName" required placeholder="Ex : Aïcha Koné">
+    </label>
+
+    <label>Numéro de téléphone
+      <input type="tel" id="custPhone" required placeholder="Ex : 07 78 99 32 55">
+    </label>
+
+    <label>Commune
+      <select id="custCommune" required>
+        <option value="">Choisis ta commune</option>
+        <option>Cocody</option>
+        <option>Yopougon</option>
+        <option>Plateau</option>
+        <option>Marcory</option>
+        <option>Treichville</option>
+        <option>Koumassi</option>
+        <option>Abobo</option>
+        <option>Adjamé</option>
+        <option>Attécoubé</option>
+        <option>Port-Bouët</option>
+        <option>Bingerville</option>
+        <option>Songon</option>
+        <option>Anyama</option>
+      </select>
+    </label>
+
+    <label>Adresse précise / repère
+      <textarea id="custAddress" rows="2" required placeholder="Quartier, rue, point de repère..."></textarea>
+    </label>
+
+    <p class="payment-note">💵 Paiement à la livraison — cash ou Mobile Money (Orange, MTN, Moov, Wave)</p>
+
+    <button type="submit" class="btn-primary cart-checkout-btn" id="submitOrder">Valider ma commande</button>
+    <p class="checkout-error" id="checkoutError" style="display:none;"></p>
+  </form>
+</aside>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

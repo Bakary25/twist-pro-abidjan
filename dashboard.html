@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Twist Pro Abidjan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<!-- ============================================
+     Écran de connexion
+     ============================================ -->
+<div class="login-screen" id="loginScreen">
+  <form class="login-card" id="loginForm">
+    <div class="logo" style="margin-bottom: 24px;">Twist<span>Pro</span> Abidjan</div>
+    <h2>Connexion admin</h2>
+    <label>Email
+      <input type="email" id="loginEmail" required placeholder="ton@email.com">
+    </label>
+    <label>Mot de passe
+      <input type="password" id="loginPassword" required placeholder="••••••••">
+    </label>
+    <button type="submit" class="btn-primary" style="width:100%;text-align:center;border:none;">Se connecter</button>
+    <p class="login-error" id="loginError" style="display:none;"></p>
+  </form>
+</div>
+
+<!-- ============================================
+     Dashboard (visible une fois connecté)
+     ============================================ -->
+<div class="dashboard" id="dashboard" style="display:none;">
+  <header class="dash-header">
+    <div class="logo">Twist<span>Pro</span> Abidjan — <span style="opacity:0.6;font-weight:600;">Dashboard</span></div>
+    <button class="btn-secondary" id="logoutBtn">Se déconnecter</button>
+  </header>
+
+  <main class="dash-main">
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="dash-panel">
+      <div class="dash-panel-header">
+        <h2>Commandes</h2>
+        <select id="statusFilter">
+          <option value="tous">Toutes</option>
+          <option value="en_attente">En attente</option>
+          <option value="confirmee">Confirmée</option>
+          <option value="expediee">Expédiée</option>
+          <option value="livree">Livrée</option>
+          <option value="annulee">Annulée</option>
+        </select>
+      </div>
+
+      <div class="orders-table-wrap">
+        <table class="orders-table" id="ordersTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Client</th>
+              <th>Téléphone</th>
+              <th>Commune</th>
+              <th>Articles</th>
+              <th>Total</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+        <p class="orders-empty" id="ordersEmpty" style="display:none;">Aucune commande pour le moment.</p>
+      </div>
+    </div>
+    <div class="dash-panel" style="margin-top:24px;">
+      <div class="dash-panel-header">
+        <h2>Catégories</h2>
+      </div>
+
+      <div class="categories-manager">
+        <form id="categoryForm" class="category-add-form">
+          <input type="text" id="newCategoryName" placeholder="Nom de la catégorie (ex : Bijoux)" required>
+          <button type="submit" class="btn-primary" style="border:none;">Ajouter</button>
+        </form>
+        <p class="form-error" id="categoryFormError" style="display:none;"></p>
+
+        <div class="categories-list" id="categoriesList"></div>
+      </div>
+    </div>
+
+    <div class="dash-panel" style="margin-top:24px;">
+      <div class="dash-panel-header">
+        <h2>Produits</h2>
+        <button class="btn-primary" id="addProductBtn" style="border:none;">+ Ajouter un produit</button>
+      </div>
+
+      <div class="orders-table-wrap">
+        <table class="orders-table" id="productsTable">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Nom</th>
+              <th>Catégorie</th>
+              <th>Prix</th>
+              <th>Prix barré</th>
+              <th>Stock</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="productsBody"></tbody>
+        </table>
+        <p class="orders-empty" id="productsEmpty" style="display:none;">Aucun produit pour le moment.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============================================
+     Formulaire produit (ajout / édition)
+     ============================================ -->
+<div class="product-modal-overlay" id="productModalOverlay">
+  <form class="product-modal" id="productForm">
+    <h3 id="productModalTitle">Ajouter un produit</h3>
+    <input type="hidden" id="productId">
+
+    <label>Nom du produit
+      <input type="text" id="productName" required placeholder="Ex : Twist prêt à poser 18&quot;">
+    </label>
+
+    <label>Catégorie
+      <select id="productCategory" required></select>
+    </label>
+
+    <div class="form-row">
+      <label>Prix (FCFA)
+        <input type="number" id="productPrice" required min="0" placeholder="12000">
+      </label>
+      <label>Prix barré (promo, optionnel)
+        <input type="number" id="productComparePrice" min="0" placeholder="15000">
+      </label>
+    </div>
+
+    <label>Stock disponible
+      <input type="number" id="productStock" required min="0" placeholder="10">
+    </label>
+
+    <label>Lien de l'image (URL)
+      <input type="url" id="productImage" placeholder="https://...">
+    </label>
+
+    <p class="form-error" id="productFormError" style="display:none;"></p>
+
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" id="cancelProductBtn">Annuler</button>
+      <button type="submit" class="btn-primary" id="saveProductBtn" style="border:none;">Enregistrer</button>
+    </div>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

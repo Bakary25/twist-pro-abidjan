@@ -1,0 +1,328 @@
+/* ============================================
+   Écran de connexion
+   ============================================ */
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--ink);
+}
+
+.login-card {
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: 40px 32px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.login-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  margin-bottom: 24px;
+}
+
+.login-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.login-card input {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 12px 14px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--white);
+}
+
+.login-card input:focus {
+  outline: 3px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.login-error {
+  color: var(--coral);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* ============================================
+   Dashboard
+   ============================================ */
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--cream);
+}
+
+.dash-main {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--coral);
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+.dash-panel {
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.dash-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.dash-panel-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+#statusFilter {
+  padding: 8px 14px;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: var(--cream);
+}
+
+.orders-table-wrap { overflow-x: auto; }
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.orders-table th {
+  text-align: left;
+  padding: 12px 24px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+  border-bottom: 2px solid var(--cream-soft);
+}
+
+.orders-table td {
+  padding: 14px 24px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--cream-soft);
+  vertical-align: top;
+}
+
+.order-items-list { font-size: 0.82rem; opacity: 0.85; }
+
+.status-select {
+  padding: 6px 10px;
+  border-radius: 100px;
+  border: 2px solid var(--ink);
+  font-weight: 700;
+  font-size: 0.78rem;
+  background: var(--cream);
+}
+
+.orders-empty { text-align: center; padding: 40px; opacity: 0.6; }
+
+/* ============================================
+   Modal produit (ajout / édition)
+   ============================================ */
+.product-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 90;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.product-modal-overlay.active { display: flex; }
+
+.product-modal {
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: 32px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.product-modal h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.product-modal label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.product-modal input,
+.product-modal select {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--ink);
+}
+
+.product-modal input:focus,
+.product-modal select:focus {
+  outline: 3px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.form-actions button { flex: 1; text-align: center; }
+
+.form-error {
+  color: var(--coral);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.product-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--cream-soft);
+}
+
+.row-actions { display: flex; gap: 8px; }
+
+.row-actions button {
+  background: var(--cream-soft);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.row-actions .delete-btn { color: var(--coral); }
+
+/* ============================================
+   Gestionnaire de catégories
+   ============================================ */
+.categories-manager { padding: 20px 24px; }
+
+.category-add-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.category-add-form input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  background: var(--white);
+  color: var(--ink);
+}
+
+.category-add-form input:focus {
+  outline: 3px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.categories-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.category-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--cream-soft);
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  padding: 8px 8px 8px 16px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.category-chip button {
+  background: var(--ink);
+  color: var(--cream);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.category-chip button:hover { background: var(--coral); }
