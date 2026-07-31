@@ -301,41 +301,36 @@ async function submitOrder(e) {
   const submitBtn = document.getElementById("submitOrder");
   errorBox.style.display = "none";
 
-  const order = {
-    id: crypto.randomUUID(),
+  const customerInfo = {
     customer_name: document.getElementById("custName").value.trim(),
     phone: document.getElementById("custPhone").value.trim(),
     commune: document.getElementById("custCommune").value,
-    address_details: document.getElementById("custAddress").value.trim(),
-    payment_method: "cash_ou_mobile_livraison",
-    status: "en_attente",
-    total: cartTotal()
+    address_details: document.getElementById("custAddress").value.trim()
   };
+
+  const items = state.cart.map(item => ({
+    product_id: item.id,
+    quantity: item.quantity
+  }));
 
   submitBtn.disabled = true;
   submitBtn.textContent = "Envoi en cours...";
 
   try {
-    const { error: orderError } = await supabaseClient
-      .from("orders")
-      .insert(order);
+    const { error: orderError } = await supabaseClient.rpc("create_order", {
+      p_customer_name: customerInfo.customer_name,
+      p_phone: customerInfo.phone,
+      p_commune: customerInfo.commune,
+      p_address_details: customerInfo.address_details,
+      p_items: items
+    });
 
     if (orderError) throw orderError;
 
-    const items = state.cart.map(item => ({
-      order_id: order.id,
-      product_id: item.id,
-      product_name: item.name,
-      unit_price: item.price,
-      quantity: item.quantity
-    }));
-
-    const { error: itemsError } = await supabaseClient.from("order_items").insert(items);
-    if (itemsError) throw itemsError;
-
-    const waLink = buildWhatsAppMessage(order);
+    const waLink = buildWhatsAppMessage({ ...customerInfo, total: cartTotal() });
     state.cart = [];
     saveCart();
+    await loadProducts();
     window.location.href = waLink;
 
   } catch (err) {
