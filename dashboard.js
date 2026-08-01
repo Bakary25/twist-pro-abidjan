@@ -294,10 +294,20 @@ function openProductForm(productId = null) {
     document.getElementById("productPrice").value = product.price;
     document.getElementById("productComparePrice").value = product.compare_price || "";
     document.getElementById("productStock").value = product.stock;
-    document.getElementById("productImage").value = (product.images && product.images[0]) || "";
+    const existingImage = (product.images && product.images[0]) || "";
+    document.getElementById("productImageExisting").value = existingImage;
+    const preview = document.getElementById("productImagePreview");
+    if (existingImage) {
+      preview.src = existingImage;
+      preview.style.display = "block";
+    } else {
+      preview.style.display = "none";
+    }
   } else {
     title.textContent = "Ajouter un produit";
     document.getElementById("productId").value = "";
+    document.getElementById("productImageExisting").value = "";
+    document.getElementById("productImagePreview").style.display = "none";
   }
 
   overlay.classList.add("active");
@@ -305,6 +315,23 @@ function openProductForm(productId = null) {
 
 function closeProductForm() {
   document.getElementById("productModalOverlay").classList.remove("active");
+}
+
+async function uploadProductImage(file) {
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+  const { error } = await supabaseClient.storage
+    .from("product-images")
+    .upload(fileName, file);
+
+  if (error) throw error;
+
+  const { data } = supabaseClient.storage
+    .from("product-images")
+    .getPublicUrl(fileName);
+
+  return data.publicUrl;
 }
 
 async function submitProductForm(e) {
@@ -316,27 +343,36 @@ async function submitProductForm(e) {
 
   const id = document.getElementById("productId").value;
   const name = document.getElementById("productName").value.trim();
-  const imageUrl = document.getElementById("productImage").value.trim();
-
-  const payload = {
-    name,
-    slug: name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Date.now(),
-    category_id: document.getElementById("productCategory").value,
-    price: parseInt(document.getElementById("productPrice").value, 10),
-    compare_price: document.getElementById("productComparePrice").value
-      ? parseInt(document.getElementById("productComparePrice").value, 10)
-      : null,
-    stock: parseInt(document.getElementById("productStock").value, 10),
-    images: imageUrl ? [imageUrl] : []
-  };
+  const fileInput = document.getElementById("productImageFile");
+  const existingImage = document.getElementById("productImageExisting").value;
 
   saveBtn.disabled = true;
   saveBtn.textContent = "Enregistrement...";
 
   try {
+    let imageUrl = existingImage;
+
+    if (fileInput.files && fileInput.files[0]) {
+      saveBtn.textContent = "Envoi de la photo...";
+      imageUrl = await uploadProductImage(fileInput.files[0]);
+    }
+
+    const payload = {
+      name,
+      slug: name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Date.now(),
+      category_id: document.getElementById("productCategory").value,
+      price: parseInt(document.getElementById("productPrice").value, 10),
+      compare_price: document.getElementById("productComparePrice").value
+        ? parseInt(document.getElementById("productComparePrice").value, 10)
+        : null,
+      stock: parseInt(document.getElementById("productStock").value, 10),
+      images: imageUrl ? [imageUrl] : []
+    };
+
+    saveBtn.textContent = "Enregistrement...";
+
     let error;
     if (id) {
-      // Édition : on ne touche pas au slug existant
       delete payload.slug;
       ({ error } = await supabaseClient.from("products").update(payload).eq("id", id));
     } else {
@@ -387,4 +423,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   document.getElementById("productForm").addEventListener("submit", submitProductForm);
   document.getElementById("categoryForm").addEventListener("submit", addCategory);
+
+  document.getElementById("productImageFile").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    const preview = document.getElementById("productImagePreview");
+    if (file) {
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+    }
+  });
 });
