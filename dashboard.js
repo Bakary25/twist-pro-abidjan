@@ -59,7 +59,7 @@ async function handleLogin(e) {
   const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   if (error) {
-    errorBox.textContent = "Email ou mot de passe incorrect.";
+    errorBox.textContent = "Erreur : " + error.message;
     errorBox.style.display = "block";
     return;
   }
