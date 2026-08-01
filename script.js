@@ -14,6 +14,20 @@ const state = {
 };
 
 // ----------------------------------------------
+// Sécurité : échapper le texte avant de l'insérer dans le HTML
+// (empêche quelqu'un d'injecter du code via un champ texte)
+// ----------------------------------------------
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// ----------------------------------------------
 // Utilitaires
 // ----------------------------------------------
 function formatFCFA(amount) {
@@ -52,7 +66,7 @@ async function loadCategoryPills() {
 
   const container = document.getElementById("categoryPills");
   const extraPills = data.map(c =>
-    `<button class="category-pill" data-cat="${c.slug}">${c.name}</button>`
+    `<button class="category-pill" data-cat="${escapeHtml(c.slug)}">${escapeHtml(c.name)}</button>`
   ).join("");
 
   container.insertAdjacentHTML("beforeend", extraPills);
@@ -162,12 +176,12 @@ function renderProducts() {
     return `
       <div class="product-card">
         <div class="product-image">
-          <img src="${p.image}" alt="${p.name}" loading="lazy">
+          <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy">
           ${promoBadge}
           ${stockBadge}
         </div>
         <div class="product-info">
-          <div class="product-name">${p.name}</div>
+          <div class="product-name">${escapeHtml(p.name)}</div>
           <div class="price-row">${priceRow}</div>
           ${action}
         </div>
@@ -253,7 +267,7 @@ function renderCart() {
     container.innerHTML = state.cart.map(item => `
       <div class="cart-item">
         <div>
-          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-name">${escapeHtml(item.name)}</div>
           <div class="cart-item-price">${formatFCFA(item.price)}</div>
         </div>
         <div class="cart-item-qty">

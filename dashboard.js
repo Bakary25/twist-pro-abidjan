@@ -2,6 +2,19 @@
 // TWIST PRO ABIDJAN — dashboard.js
 // ============================================
 
+// ----------------------------------------------
+// Sécurité : échapper le texte avant de l'insérer dans le HTML
+// ----------------------------------------------
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 let allOrders = [];
 
 function formatFCFA(amount) {
@@ -125,11 +138,11 @@ function renderOrders() {
   tbody.innerHTML = orders.map(order => `
     <tr>
       <td>${formatDate(order.created_at)}</td>
-      <td>${order.customer_name}</td>
-      <td>${order.phone}</td>
-      <td>${order.commune}</td>
+      <td>${escapeHtml(order.customer_name)}</td>
+      <td>${escapeHtml(order.phone)}</td>
+      <td>${escapeHtml(order.commune)}</td>
       <td class="order-items-list">
-        ${order.order_items.map(item => `${item.product_name} x${item.quantity}`).join("<br>")}
+        ${order.order_items.map(item => `${escapeHtml(item.product_name)} x${item.quantity}`).join("<br>")}
       </td>
       <td>${formatFCFA(order.total)}</td>
       <td>
@@ -175,7 +188,7 @@ async function loadCategories() {
   allCategories = data;
 
   const select = document.getElementById("productCategory");
-  select.innerHTML = allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+  select.innerHTML = allCategories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("");
 
   renderCategoriesList();
 }
@@ -189,7 +202,7 @@ function renderCategoriesList() {
 
   list.innerHTML = allCategories.map(c => `
     <div class="category-chip">
-      ${c.name}
+      ${escapeHtml(c.name)}
       <button onclick="deleteCategory('${c.id}')" aria-label="Supprimer">✕</button>
     </div>
   `).join("");
@@ -261,9 +274,9 @@ function renderProductsTable() {
 
   tbody.innerHTML = allProducts.map(p => `
     <tr>
-      <td><img class="product-thumb" src="${(p.images && p.images[0]) || 'https://placehold.co/100x100?text=?'}" alt=""></td>
-      <td>${p.name}</td>
-      <td>${p.categories ? p.categories.name : "—"}</td>
+      <td><img class="product-thumb" src="${escapeHtml((p.images && p.images[0]) || 'https://placehold.co/100x100?text=?')}" alt=""></td>
+      <td>${escapeHtml(p.name)}</td>
+      <td>${p.categories ? escapeHtml(p.categories.name) : "—"}</td>
       <td>${formatFCFA(p.price)}</td>
       <td>${p.compare_price ? formatFCFA(p.compare_price) : "—"}</td>
       <td>${p.stock}</td>
