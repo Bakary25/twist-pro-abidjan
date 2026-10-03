@@ -147,7 +147,7 @@ function renderOrders() {
       </td>
       <td>${formatFCFA(order.total)}</td>
       <td>
-        <select class="status-select" onchange="updateStatus('${order.id}', this.value)">
+        <select class="status-select" data-order-id="${escapeHtml(order.id)}">
           ${Object.entries(STATUS_LABELS).map(([value, label]) =>
             `<option value="${value}" ${order.status === value ? "selected" : ""}>${label}</option>`
           ).join("")}
@@ -155,6 +155,13 @@ function renderOrders() {
       </td>
     </tr>
   `).join("");
+}
+
+// Délégation d'événements (pas d'attributs onclick/onchange inline → compatible CSP script-src sans 'unsafe-inline')
+function handleOrdersBodyChange(e) {
+  const select = e.target.closest(".status-select");
+  if (!select) return;
+  updateStatus(select.dataset.orderId, select.value);
 }
 
 async function updateStatus(orderId, newStatus) {
@@ -204,9 +211,15 @@ function renderCategoriesList() {
   list.innerHTML = allCategories.map(c => `
     <div class="category-chip">
       ${escapeHtml(c.name)}
-      <button onclick="deleteCategory('${c.id}')" aria-label="Supprimer">✕</button>
+      <button data-action="delete-category" data-id="${escapeHtml(c.id)}" aria-label="Supprimer">✕</button>
     </div>
   `).join("");
+}
+
+function handleCategoriesListClick(e) {
+  const btn = e.target.closest('[data-action="delete-category"]');
+  if (!btn) return;
+  deleteCategory(btn.dataset.id);
 }
 
 async function addCategory(e) {
@@ -351,12 +364,24 @@ function renderProductsTable() {
       <td>${p.stock}</td>
       <td>
         <div class="row-actions">
-          <button onclick="openProductForm('${p.id}')">Modifier</button>
-          <button class="delete-btn" onclick="deleteProduct('${p.id}')">Supprimer</button>
+          <button data-action="edit-product" data-id="${escapeHtml(p.id)}">Modifier</button>
+          <button class="delete-btn" data-action="delete-product" data-id="${escapeHtml(p.id)}">Supprimer</button>
         </div>
       </td>
     </tr>
   `).join("");
+}
+
+function handleProductsBodyClick(e) {
+  const editBtn = e.target.closest('[data-action="edit-product"]');
+  if (editBtn) {
+    openProductForm(editBtn.dataset.id);
+    return;
+  }
+  const deleteBtn = e.target.closest('[data-action="delete-product"]');
+  if (deleteBtn) {
+    deleteProduct(deleteBtn.dataset.id);
+  }
 }
 
 function openProductForm(productId = null) {
@@ -505,6 +530,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   document.getElementById("productForm").addEventListener("submit", submitProductForm);
   document.getElementById("categoryForm").addEventListener("submit", addCategory);
+
+  document.getElementById("ordersBody").addEventListener("change", handleOrdersBodyChange);
+  document.getElementById("categoriesList").addEventListener("click", handleCategoriesListClick);
+  document.getElementById("productsBody").addEventListener("click", handleProductsBodyClick);
 
   document.getElementById("productImageFile").addEventListener("change", (e) => {
     const file = e.target.files[0];

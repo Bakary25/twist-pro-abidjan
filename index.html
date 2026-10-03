@@ -182,12 +182,16 @@
 
     <p class="payment-note">💵 Paiement à la livraison — cash ou Mobile Money (Orange, MTN, Moov, Wave)</p>
 
+    <!-- Anti-spam : widget Cloudflare Turnstile, vérifié côté serveur dans create_order() -->
+    <div class="cf-turnstile" data-sitekey="REMPLACE_PAR_TA_CLE_SITE_TURNSTILE" style="margin: 4px 0 12px;"></div>
+
     <button type="submit" class="btn-primary cart-checkout-btn" id="submitOrder">Valider ma commande</button>
     <p class="checkout-error" id="checkoutError" style="display:none;"></p>
   </form>
 </aside>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="config.js"></script>
 <script src="script.js"></script>
 </body>

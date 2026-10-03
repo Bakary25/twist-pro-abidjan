@@ -92,15 +92,26 @@ async function loadProducts() {
     return;
   }
 
-  state.products = data.map(p => ({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    comparePrice: p.compare_price,
-    stock: p.stock,
-    category: p.categories ? p.categories.slug : null,
-    image: (p.images && p.images.length > 0) ? p.images[0] : "https://placehold.co/500x500?text=Twist+Pro"
-  }));
+  const FALLBACK_IMAGE = "https://placehold.co/500x500?text=Twist+Pro";
+
+  state.products = data.map(p => {
+    const rawImage = (p.images && p.images.length > 0) ? p.images[0] : "";
+    // Défense en profondeur : n'injecte jamais une URL d'image qui ne soit pas https://
+    // (empêche un schéma javascript:/data: stocké en base de s'exécuter côté client).
+    const image = typeof rawImage === "string" && rawImage.startsWith("https://")
+      ? rawImage
+      : FALLBACK_IMAGE;
+
+    return {
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      comparePrice: p.compare_price,
+      stock: p.stock,
+      category: p.categories ? p.categories.slug : null,
+      image
+    };
+  });
 
   state.loading = false;
   renderProducts();
@@ -168,9 +179,9 @@ function renderProducts() {
     const action = isOut
       ? `<button class="out-of-stock-btn" disabled>Épuisé</button>`
       : `<div class="qty-stepper">
-           <button onclick="stepQty('${p.id}', -1)" aria-label="Retirer">−</button>
+           <button data-action="step-qty" data-id="${escapeHtml(p.id)}" data-delta="-1" aria-label="Retirer">−</button>
            <span class="qty-value">${qty}</span>
-           <button onclick="stepQty('${p.id}', 1)" aria-label="Ajouter">+</button>
+           <button data-action="step-qty" data-id="${escapeHtml(p.id)}" data-delta="1" aria-label="Ajouter">+</button>
          </div>`;
 
     return `
@@ -188,6 +199,13 @@ function renderProducts() {
       </div>
     `;
   }).join("");
+}
+
+// Délégation d'événements (pas d'attributs onclick inline → compatible CSP script-src sans 'unsafe-inline')
+function handleProductGridClick(e) {
+  const btn = e.target.closest('[data-action="step-qty"]');
+  if (!btn) return;
+  stepQty(btn.dataset.id, parseInt(btn.dataset.delta, 10));
 }
 
 function initCategoryFilter() {
@@ -271,15 +289,21 @@ function renderCart() {
           <div class="cart-item-price">${formatFCFA(item.price)}</div>
         </div>
         <div class="cart-item-qty">
-          <button class="qty-btn" onclick="changeQty('${item.id}', -1)">−</button>
+          <button class="qty-btn" data-action="change-qty" data-id="${escapeHtml(item.id)}" data-delta="-1">−</button>
           <span>${item.quantity}</span>
-          <button class="qty-btn" onclick="changeQty('${item.id}', 1)">+</button>
+          <button class="qty-btn" data-action="change-qty" data-id="${escapeHtml(item.id)}" data-delta="1">+</button>
         </div>
       </div>
     `).join("");
   }
 
   document.getElementById("cartTotal").textContent = formatFCFA(cartTotal());
+}
+
+function handleCartItemsClick(e) {
+  const btn = e.target.closest('[data-action="change-qty"]');
+  if (!btn) return;
+  changeQty(btn.dataset.id, parseInt(btn.dataset.delta, 10));
 }
 
 // ----------------------------------------------
@@ -327,6 +351,14 @@ async function submitOrder(e) {
     quantity: item.quantity
   }));
 
+  // Anti-spam : jeton Cloudflare Turnstile, vérifié côté serveur dans create_order()
+  const turnstileToken = window.turnstile ? turnstile.getResponse() : "";
+  if (!turnstileToken) {
+    errorBox.textContent = "Merci de valider le contrôle anti-robot avant d'envoyer la commande.";
+    errorBox.style.display = "block";
+    return;
+  }
+
   submitBtn.disabled = true;
   submitBtn.textContent = "Envoi en cours...";
 
@@ -336,7 +368,8 @@ async function submitOrder(e) {
       p_phone: customerInfo.phone,
       p_commune: customerInfo.commune,
       p_address_details: customerInfo.address_details,
-      p_items: items
+      p_items: items,
+      p_turnstile_token: turnstileToken
     });
 
     if (orderError) throw orderError;
@@ -353,6 +386,8 @@ async function submitOrder(e) {
     errorBox.style.display = "block";
     submitBtn.disabled = false;
     submitBtn.textContent = "Valider ma commande";
+    // Un jeton Turnstile est à usage unique : on réinitialise le widget pour permettre un nouvel essai
+    if (window.turnstile) turnstile.reset();
   }
 }
 
@@ -373,4 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("goToCheckout").addEventListener("click", showCheckoutView);
   document.getElementById("checkoutBack").addEventListener("click", showCartView);
   document.getElementById("checkoutView").addEventListener("submit", submitOrder);
+
+  document.getElementById("productsGrid").addEventListener("click", handleProductGridClick);
+  document.getElementById("cartItems").addEventListener("click", handleCartItemsClick);
 });

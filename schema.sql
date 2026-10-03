@@ -74,14 +74,10 @@ create policy "public_read_categories" on categories
 create policy "public_read_products" on products
   for select using (is_active = true);
 
--- Création de commande publique (n'importe quel visiteur peut passer commande)
-create policy "public_insert_orders" on orders
-  for insert with check (true);
-
-create policy "public_insert_order_items" on order_items
-  for insert with check (true);
-
--- Pas de lecture publique des commandes (réservé à l'admin authentifié)
+-- Pas d'accès direct public à orders/order_items (ni lecture, ni écriture) :
+-- la création de commande passe exclusivement par la fonction create_order()
+-- (SECURITY DEFINER, voir security_hardening.sql), qui valide le stock, recalcule
+-- le total côté serveur et vérifie un jeton anti-spam avant d'insérer quoi que ce soit.
 create policy "admin_read_orders" on orders
   for select using (auth.role() = 'authenticated');
 
@@ -90,10 +86,14 @@ create policy "admin_read_order_items" on order_items
 
 -- Admin peut tout gérer sur produits/catégories (via dashboard authentifié)
 create policy "admin_manage_products" on products
-  for all using (auth.role() = 'authenticated');
+  for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 create policy "admin_manage_categories" on categories
-  for all using (auth.role() = 'authenticated');
+  for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 create policy "admin_manage_orders" on orders
-  for update using (auth.role() = 'authenticated');
+  for update using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+
+-- La fonction create_order() (RPC appelée depuis script.js) et le reste du
+-- durcissement sécurité (extension http, secret Turnstile) sont définis dans
+-- security_hardening.sql — à exécuter juste après ce fichier sur une base neuve.
