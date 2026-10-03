@@ -102,6 +102,7 @@ async function loadOrders() {
   allOrders = data;
   renderStats();
   renderOrders();
+  renderProductStats();
 }
 
 function renderStats() {
@@ -258,6 +259,74 @@ async function loadProducts() {
 
   allProducts = data;
   renderProductsTable();
+  renderProductStats();
+}
+
+// ----------------------------------------------
+// Statistiques (ventes par produit)
+// ----------------------------------------------
+
+// Agrège quantité vendue et CA par produit à partir des order_items,
+// en ignorant les commandes annulées (comme pour le CA global de renderStats).
+function computeProductSales() {
+  const salesByProduct = {}; // product_id -> { name, qty, revenue }
+
+  allOrders
+    .filter(order => order.status !== "annulee")
+    .forEach(order => {
+      (order.order_items || []).forEach(item => {
+        const key = item.product_id || item.product_name;
+        if (!salesByProduct[key]) {
+          salesByProduct[key] = { productId: item.product_id, name: item.product_name, qty: 0, revenue: 0 };
+        }
+        salesByProduct[key].qty += item.quantity;
+        salesByProduct[key].revenue += item.quantity * item.unit_price;
+      });
+    });
+
+  return salesByProduct;
+}
+
+function renderProductStats() {
+  const topBody = document.getElementById("topSellingBody");
+  const leastBody = document.getElementById("leastSellingBody");
+  const revenueBody = document.getElementById("revenueByProductBody");
+  if (!topBody || !leastBody || !revenueBody) return;
+
+  const salesByProduct = computeProductSales();
+  const sold = Object.values(salesByProduct);
+
+  // Top 5 les plus vendus et top 5 du CA : uniquement les produits réellement vendus
+  const topSelling = [...sold].sort((a, b) => b.qty - a.qty).slice(0, 5);
+  const topRevenue = [...sold].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+
+  // Moins vendus : tous les produits actifs, avec 0 pour ceux jamais commandés
+  const activeSales = allProducts
+    .filter(p => p.is_active !== false)
+    .map(p => ({
+      name: p.name,
+      qty: salesByProduct[p.id] ? salesByProduct[p.id].qty : 0
+    }));
+  const leastSelling = [...activeSales]
+    .sort((a, b) => a.qty - b.qty || a.name.localeCompare(b.name))
+    .slice(0, 5);
+
+  const renderRows = (body, rows, emptyLabel, valueFn) => {
+    if (rows.length === 0) {
+      body.innerHTML = `<tr><td colspan="2" style="opacity:0.6;">${emptyLabel}</td></tr>`;
+      return;
+    }
+    body.innerHTML = rows.map(row => `
+      <tr>
+        <td>${escapeHtml(row.name)}</td>
+        <td>${valueFn(row)}</td>
+      </tr>
+    `).join("");
+  };
+
+  renderRows(topBody, topSelling, "Aucune vente pour le moment.", row => row.qty);
+  renderRows(leastBody, leastSelling, "Aucun produit actif pour le moment.", row => row.qty);
+  renderRows(revenueBody, topRevenue, "Aucune vente pour le moment.", row => formatFCFA(row.revenue));
 }
 
 function renderProductsTable() {

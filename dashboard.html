@@ -112,6 +112,44 @@
         <p class="orders-empty" id="productsEmpty" style="display:none;">Aucun produit pour le moment.</p>
       </div>
     </div>
+
+    <div class="dash-panel" style="margin-top:24px;">
+      <div class="dash-panel-header">
+        <h2>Statistiques</h2>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stats-block">
+          <h3>Top 5 des articles les plus vendus</h3>
+          <table class="orders-table stats-table">
+            <thead>
+              <tr><th>Produit</th><th>Quantité vendue</th></tr>
+            </thead>
+            <tbody id="topSellingBody"></tbody>
+          </table>
+        </div>
+
+        <div class="stats-block">
+          <h3>Top 5 des articles les moins vendus</h3>
+          <table class="orders-table stats-table">
+            <thead>
+              <tr><th>Produit</th><th>Quantité vendue</th></tr>
+            </thead>
+            <tbody id="leastSellingBody"></tbody>
+          </table>
+        </div>
+
+        <div class="stats-block">
+          <h3>Chiffre d'affaires par produit</h3>
+          <table class="orders-table stats-table">
+            <thead>
+              <tr><th>Produit</th><th>CA généré</th></tr>
+            </thead>
+            <tbody id="revenueByProductBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 

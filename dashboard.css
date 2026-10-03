@@ -158,6 +158,24 @@
 
 .order-items-list { font-size: 0.82rem; opacity: 0.85; }
 
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  padding: 24px;
+}
+
+.stats-block h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.stats-table { min-width: 0; }
+
+.stats-table th { padding: 10px 12px; }
+.stats-table td { padding: 10px 12px; }
+
 .status-select {
   padding: 6px 10px;
   border-radius: 100px;
