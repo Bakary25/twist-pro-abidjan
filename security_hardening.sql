@@ -108,7 +108,9 @@ create or replace function public.create_order(
   p_items jsonb,            -- ex: [{"product_id": "...", "quantity": 2}, ...]
   p_turnstile_token text     -- jeton du widget Cloudflare Turnstile côté front
 )
-returns uuid
+returns jsonb              -- {"id": uuid, "total": integer} : le total recalculé
+                            -- côté serveur, à utiliser par le front (ex. message
+                            -- WhatsApp) plutôt que le total calculé côté client
 language plpgsql
 security definer
 set search_path = public, extensions
@@ -233,7 +235,7 @@ begin
     update products set stock = stock - v_quantity where id = v_product.id;
   end loop;
 
-  return v_order_id;
+  return jsonb_build_object('id', v_order_id, 'total', v_total);
 end;
 $$;
 

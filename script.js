@@ -401,7 +401,7 @@ async function submitOrder(e) {
   submitBtn.textContent = "Envoi en cours...";
 
   try {
-    const { error: orderError } = await supabaseClient.rpc("create_order", {
+    const { data: orderResult, error: orderError } = await supabaseClient.rpc("create_order", {
       p_customer_name: customerInfo.customer_name,
       p_phone: customerInfo.phone,
       p_commune: customerInfo.commune,
@@ -412,7 +412,10 @@ async function submitOrder(e) {
 
     if (orderError) throw orderError;
 
-    const waLink = buildWhatsAppMessage({ ...customerInfo, total: cartTotal() });
+    // Le total vient de create_order() (recalculé serveur avec les prix actuels),
+    // pas du panier local qui peut contenir un prix périmé si celui-ci a changé
+    // depuis l'ajout au panier (panier persistant via localStorage).
+    const waLink = buildWhatsAppMessage({ ...customerInfo, total: orderResult.total });
     state.cart = [];
     saveCart();
     await loadProducts();
