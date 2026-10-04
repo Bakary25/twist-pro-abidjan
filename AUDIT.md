@@ -6,22 +6,21 @@ Date : 2026-10-04 · Repo `Bakary25/twist-pro-abidjan` @ `main`
 
 Le site fonctionne et les protections RLS/Auth de base sont solides (orders, order_items,
 écritures anonymes sur products/categories, storage, inscription publique : tout correctement
-bloqué). Mais trois problèmes critiques réduisent fortement la sécurité et la confiance qu'on
-peut avoir dans l'état actuel : le dossier `.git` et les fichiers SQL sont exposés publiquement,
-une ancienne fonction `create_order()` sans aucune validation coexiste en base avec la version
-sécurisée et peut être appelée directement (stock falsifiable, fausses commandes), et le site
-en production a 3 commits de retard sur `main` (donc aucun des correctifs de sécurité déjà
-écrits n'est réellement actif aujourd'hui). Le code applicatif (script.js, dashboard.js) est
-globalement propre et bien protégé contre le XSS. Plusieurs correctifs sans risque sont déjà
-appliqués et committés ; les actions critiques restantes demandent ton feu vert ou ton exécution
-manuelle en base.
+bloqué). Trois problèmes critiques ont été trouvés : **(corrigé le 2026-10-04)** une ancienne
+fonction `create_order()` sans aucune validation coexistait en base avec la version sécurisée et
+pouvait être appelée directement (stock falsifiable, fausses commandes) ; **(restent à corriger)**
+le dossier `.git` et les fichiers SQL sont toujours exposés publiquement, et le site en production
+a toujours 3 commits de retard sur `main` (donc le reste des correctifs de sécurité déjà écrits
+n'est pas encore actif — un redéploiement est nécessaire). Le code applicatif (script.js,
+dashboard.js) est globalement propre et bien protégé contre le XSS. Plusieurs correctifs sans
+risque sont déjà appliqués et committés.
 
 ## Tableau des problèmes
 
 | # | Sévérité | Où | Comment le reproduire | Correction |
 |---|---|---|---|---|
 | 1 | **Critique** | Déploiement Cloudflare | `curl https://twistproabidjan.com/.git/config` → 200, contenu réel du repo. Idem `.git/HEAD`, `.git/logs/HEAD`, `.git/index`, `.git/description`, `.git/refs/heads/main`, et `/schema.sql` (200, dump complet du schéma) | **Appliqué** : `.assetsignore` ajouté (exclut `.git` et `*.sql` des assets). **Effectif seulement après un nouveau déploiement** — voir recommandations |
-| 2 | **Critique** | Supabase, fonction `create_order` | Appel direct à l'API REST avec la clé anon (publique) et 5 paramètres (sans `p_turnstile_token`) : quantité négative acceptée → augmente le stock ; quantité 0 acceptée ; commune invalide acceptée ; nom client vide accepté ; pas de limite d'articles vérifiée | Script **écrit, à exécuter par toi** : `fix_drop_legacy_create_order.sql` (supprime l'ancienne fonction à 5 paramètres) |
+| 2 | **Critique — corrigé ✅** | Supabase, fonction `create_order` | Appel direct à l'API REST avec la clé anon (publique) et 5 paramètres (sans `p_turnstile_token`) : quantité négative acceptée → augmente le stock ; quantité 0 acceptée ; commune invalide acceptée ; nom client vide accepté ; pas de limite d'articles vérifiée | **Corrigé le 2026-10-04** : `fix_drop_legacy_create_order.sql` exécuté. Revérifié par API : l'appel à 5 paramètres renvoie désormais « fonction introuvable », seule la version à 6 paramètres (avec vérification Turnstile serveur) répond |
 | 3 | **Critique** | Déploiement | Le live déployé correspond au commit `ce5760c`, 3 commits derrière `main` (confirmé via `.git/refs/heads/main` exposé). Résultat : pas de Turnstile actif, dashboard encore en `onclick` inline (incompatible avec la CSP prévue), pas de section Statistiques, et **`_headers` n'est pas déployé** → aucune CSP/HSTS/X-Frame-Options active aujourd'hui en prod (vérifié par `curl -I`) | Recommandation : redéployer (voir priorités) |
 | 4 | Important | Déploiement | Pas de `wrangler.toml`/`.json` dans le repo, ni de `package.json` → le déploiement dépend entièrement d'une configuration Cloudflare Dashboard non versionnée (asset directory, build command). Impossible de savoir d'où venait l'upload de `.git/` sans ça | Recommandation seulement (pas appliqué, risque de casser le déploiement actuel si mal configuré) |
 | 5 | Important | `script.js`, `submitOrder()` | Le total affiché dans le message WhatsApp est calculé **côté client** à partir du prix au moment de l'ajout au panier (`cartTotal()`), alors que `create_order()` recalcule le vrai total **côté serveur** avec le prix actuel. Si un prix change pendant qu'un article est dans le panier (panier persistant via localStorage), le total envoyé au vendeur par WhatsApp peut différer du total réellement enregistré dans `orders.total` | Proposé, pas appliqué : faire retourner `{id, total}` par `create_order()` au lieu d'un simple `uuid`, et utiliser ce total pour le message WhatsApp. Dis-moi si tu veux que je l'implémente (ça change le type de retour de la fonction RPC) |
@@ -75,9 +74,7 @@ que les 5 commandes de test n'existent plus si tu veux une confirmation définit
 
 ## Recommandations, par ordre de priorité
 
-1. **Exécuter `fix_drop_legacy_create_order.sql`** après avoir vérifié que le widget Turnstile
-   fonctionne bien sur le site (sinon plus personne ne pourra commander une fois l'ancienne
-   fonction supprimée) — referme la faille #2, la plus grave
+1. ~~Exécuter `fix_drop_legacy_create_order.sql`~~ **Fait le 2026-10-04**, vérifié par API
 2. **Redéployer le site** (`npx wrangler deploy` ou push déclenchant le build Cloudflare) — le
    `.assetsignore` ajouté ne prend effet qu'au prochain déploiement, et c'est aussi le seul moyen
    d'activer enfin `_headers` (CSP/HSTS/etc. inactifs en prod actuellement) et le reste des
