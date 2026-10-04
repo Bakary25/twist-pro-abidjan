@@ -382,7 +382,12 @@ async function submitOrder(e) {
 
   } catch (err) {
     console.error(err);
-    errorBox.textContent = "Erreur : " + (err.message || JSON.stringify(err));
+    // err.code === "P0001" : message métier levé volontairement par create_order()
+    // (déjà rédigé en français pour le client). Les autres erreurs (réseau, panne
+    // Supabase...) sont techniques : on affiche un message générique à la place.
+    errorBox.textContent = err.code === "P0001" && err.message
+      ? "Erreur : " + err.message
+      : "Une erreur est survenue, réessaie dans un instant.";
     errorBox.style.display = "block";
     submitBtn.disabled = false;
     submitBtn.textContent = "Valider ma commande";
