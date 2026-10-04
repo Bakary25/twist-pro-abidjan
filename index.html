@@ -159,11 +159,14 @@
     <button type="button" class="checkout-back" id="checkoutBack">← Retour au panier</button>
 
     <label>Nom complet
-      <input type="text" id="custName" required placeholder="Ex : Aïcha Koné">
+      <input type="text" id="custName" required maxlength="100" placeholder="Ex : Aïcha Koné">
     </label>
 
     <label>Numéro de téléphone
-      <input type="tel" id="custPhone" required placeholder="Ex : 07 78 99 32 55">
+      <input type="tel" id="custPhone" required maxlength="20" inputmode="tel"
+        pattern="(\+?225[\s.-]?)?0?[\s.-]?(\d[\s.-]?){8}\d"
+        title="Numéro ivoirien à 10 chiffres, avec ou sans +225 (ex : 07 78 99 32 55)"
+        placeholder="Ex : 07 78 99 32 55">
     </label>
 
     <label>Commune
@@ -186,7 +189,7 @@
     </label>
 
     <label>Adresse précise / repère
-      <textarea id="custAddress" rows="2" required placeholder="Quartier, rue, point de repère..."></textarea>
+      <textarea id="custAddress" rows="2" required maxlength="300" placeholder="Quartier, rue, point de repère..."></textarea>
     </label>
 
     <p class="payment-note">💵 Paiement à la livraison — cash ou Mobile Money (Orange, MTN, Moov, Wave)</p>
