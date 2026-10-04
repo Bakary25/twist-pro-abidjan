@@ -114,7 +114,45 @@ async function loadProducts() {
   });
 
   state.loading = false;
+  reconcileCart();
   renderProducts();
+}
+
+// ----------------------------------------------
+// Purge du panier : retire les articles désactivés/épuisés entre-temps,
+// plafonne les quantités au stock actuel (le serveur revalide de toute
+// façon à la commande, mais on évite de laisser le client bloqué avec
+// un panier qu'il ne peut plus valider sans savoir pourquoi)
+// ----------------------------------------------
+function reconcileCart() {
+  let changed = false;
+  const nextCart = [];
+
+  state.cart.forEach(item => {
+    const product = state.products.find(p => p.id === item.id);
+    if (!product || product.stock <= 0) {
+      changed = true;
+      return;
+    }
+    if (item.quantity > product.stock) {
+      changed = true;
+      nextCart.push({ ...item, quantity: product.stock });
+    } else {
+      nextCart.push(item);
+    }
+  });
+
+  const notice = document.getElementById("cartNotice");
+  if (changed) {
+    state.cart = nextCart;
+    saveCart();
+    if (notice) {
+      notice.textContent = "Ton panier a été mis à jour : un ou plusieurs articles n'étaient plus disponibles dans la quantité demandée.";
+      notice.style.display = "block";
+    }
+  } else if (notice) {
+    notice.style.display = "none";
+  }
 }
 
 // ----------------------------------------------
