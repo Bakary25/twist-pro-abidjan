@@ -6,6 +6,7 @@
   --cream: #FFFFFF;
   --cream-soft: #F2F2F2;
   --gold: #C68A3F;
+  --gold-text: #9D6C2F; /* variante plus sombre, lisible en texte sur fond clair (contraste AA ~4.55:1) */
   --coral: #E5595A;
   --green: #2F4A3C;
   --white: #FFFFFF;
@@ -189,7 +190,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 
 .hero-eyebrow {
   font-weight: 700;
-  color: var(--gold);
+  color: var(--gold-text);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.85rem;
@@ -379,7 +380,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 
 .product-price {
   font-family: var(--font-display);
-  color: var(--gold);
+  color: var(--gold-text);
   font-weight: 600;
   font-size: 1.05rem;
 }
@@ -578,6 +579,16 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 
 .cart-empty { text-align: center; opacity: 0.6; padding: 40px 0; font-size: 0.9rem; }
+
+.cart-notice {
+  background: var(--cream-soft);
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
 
 .cart-footer {
   margin-top: auto;
