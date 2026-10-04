@@ -11,8 +11,9 @@ bloqué). Les trois problèmes critiques identifiés sont **tous corrigés et v�
 redéployé (`.git`/`*.sql` ne sont plus exposés, les en-têtes de sécurité CSP/HSTS sont actifs), et
 le dashboard authentifié a été testé de bout en bout (commandes, produits avec upload photo,
 catégories, statistiques) sans anomalie. Le code applicatif (script.js, dashboard.js) est propre
-et bien protégé contre le XSS. Restent trois améliorations "Important" proposées mais pas
-appliquées (total WhatsApp, panier obsolète, contraste du doré) en attente de ta décision.
+et bien protégé contre le XSS. Les trois améliorations "Important" restantes (total WhatsApp,
+panier obsolète, contraste du doré) sont maintenant codées et committées, **mais pas encore
+déployées** — voir recommandation #1, l'ordre d'exécution (SQL avant déploiement) est important.
 
 ## Tableau des problèmes
 
@@ -22,9 +23,9 @@ appliquées (total WhatsApp, panier obsolète, contraste du doré) en attente de
 | 2 | **Critique — corrigé ✅** | Supabase, fonction `create_order` | Appel direct à l'API REST avec la clé anon (publique) et 5 paramètres (sans `p_turnstile_token`) : quantité négative acceptée → augmente le stock ; quantité 0 acceptée ; commune invalide acceptée ; nom client vide accepté ; pas de limite d'articles vérifiée | **Corrigé le 2026-10-04** : `fix_drop_legacy_create_order.sql` exécuté. Revérifié par API : l'appel à 5 paramètres renvoie désormais « fonction introuvable », seule la version à 6 paramètres (avec vérification Turnstile serveur) répond |
 | 3 | **Critique — corrigé ✅** | Déploiement | Le live déployé correspondait au commit `ce5760c`, 3 commits derrière `main`. Résultat : pas de Turnstile actif, dashboard encore en `onclick` inline, pas de section Statistiques, et `_headers` pas déployé (aucune CSP/HSTS/X-Frame-Options active) | **Corrigé le 2026-10-04** (même redéploiement que #1). Revérifié : `script.js` servi est identique au repo (diff vide), `dashboard.js` utilise `data-action` (0 `onclick`), CSP/HSTS/X-Frame-Options/Referrer-Policy/Permissions-Policy tous présents sur `curl -I`, Turnstile et section Statistiques visibles |
 | 4 | Important | Déploiement | Pas de `wrangler.toml`/`.json` dans le repo, ni de `package.json` → le déploiement dépend entièrement d'une configuration Cloudflare Dashboard non versionnée (asset directory, build command). Impossible de savoir d'où venait l'upload de `.git/` sans ça | Recommandation seulement (pas appliqué, risque de casser le déploiement actuel si mal configuré) |
-| 5 | Important | `script.js`, `submitOrder()` | Le total affiché dans le message WhatsApp est calculé **côté client** à partir du prix au moment de l'ajout au panier (`cartTotal()`), alors que `create_order()` recalcule le vrai total **côté serveur** avec le prix actuel. Si un prix change pendant qu'un article est dans le panier (panier persistant via localStorage), le total envoyé au vendeur par WhatsApp peut différer du total réellement enregistré dans `orders.total` | Proposé, pas appliqué : faire retourner `{id, total}` par `create_order()` au lieu d'un simple `uuid`, et utiliser ce total pour le message WhatsApp. Dis-moi si tu veux que je l'implémente (ça change le type de retour de la fonction RPC) |
-| 6 | Important | `script.js`, panier localStorage | Un produit désactivé ou épuisé après avoir été ajouté au panier n'est jamais retiré automatiquement de `state.cart` (qui n'est jamais recoupé avec `state.products` après `loadProducts()`). Le client voit l'article indéfiniment dans son panier, et la tentative de commande échoue avec un message générique ("Produit introuvable ou indisponible") sans dire lequel — le client est bloqué sans solution évidente autre que vider tout son panier | Proposé, pas appliqué : purger/ajuster `state.cart` à chaque `loadProducts()` par rapport aux produits actifs, et prévenir l'utilisateur si un article a été retiré. Dis-moi si je l'implémente |
-| 7 | Important | `style.css`, couleur `--gold` | `#C68A3F` sur blanc = ratio de contraste **2.95:1**, sous le seuil WCAG AA (4.5:1 texte normal / 3:1 grand texte). Utilisé notamment pour **le prix des produits** (`.product-price`), élément clé de la page | Proposé, pas appliqué : une nuance plus sombre pour le texte, ex. `#9D6C2F` (≈4.55:1), en gardant `#C68A3F` pour les éléments décoratifs/larges (titre hero). Dis-moi si je l'applique |
+| 5 | Important — corrigé ✅ | `script.js`, `submitOrder()` | Le total affiché dans le message WhatsApp était calculé **côté client** à partir du prix au moment de l'ajout au panier (`cartTotal()`), alors que `create_order()` recalcule le vrai total **côté serveur** avec le prix actuel. Si un prix changeait pendant qu'un article était dans le panier (panier persistant via localStorage), le total envoyé au vendeur par WhatsApp pouvait différer du total réellement enregistré dans `orders.total` | **Codé** : `create_order()` renvoie désormais `{"id": uuid, "total": integer}` au lieu d'un simple `uuid` ; `script.js` utilise ce total pour le message WhatsApp. Committé localement. **⚠️ Pas encore déployé/migré** — voir recommandations, l'ordre d'exécution est important |
+| 6 | Important — corrigé ✅ | `script.js`, panier localStorage | Un produit désactivé ou épuisé après avoir été ajouté au panier n'était jamais retiré automatiquement de `state.cart` (jamais recoupé avec `state.products` après `loadProducts()`). Le client voyait l'article indéfiniment dans son panier, et la tentative de commande échouait avec un message générique sans dire lequel — bloqué sans solution évidente autre que vider tout son panier | **Codé** : `reconcileCart()` purge/plafonne `state.cart` à chaque chargement du catalogue par rapport aux produits actifs, et prévient le client via un bandeau dans le panier si celui-ci a été modifié. Committé localement, pas encore déployé |
+| 7 | Important — corrigé ✅ | `style.css`, couleur `--gold` | `#C68A3F` sur blanc = ratio de contraste **2.95:1**, sous le seuil WCAG AA (4.5:1 texte normal / 3:1 grand texte). Utilisé notamment pour **le prix des produits** (`.product-price`), élément clé de la page | **Codé** : nouvelle variable `--gold-text: #9D6C2F` (≈4.55:1) utilisée pour `.product-price` et `.hero-eyebrow` ; `--gold` conservé pour le logo et le titre hero (décoratifs/larges) et sur fond sombre (footer, déjà à 6.39:1). Committé localement, pas encore déployé |
 | 8 | Important | Supabase, RPC `create_order` | Pas de limite de débit par téléphone/IP au-delà de Turnstile. Une fois le correctif #2 appliqué et Turnstile pleinement actif en prod, le risque de spam de masse est réduit mais pas nul | Recommandation pour plus tard, pas d'implémentation demandée |
 | 9 | Important | Storage `product-images` | Policies de bucket (upload/delete anonyme, limites de taille/type MIME) configurées uniquement dans le Dashboard Supabase, aucune trace dans le repo | Non testable sans risquer de supprimer une vraie photo produit (voir "non testé"). `audit_inspect_db_state.sql` interroge `storage.buckets`/`pg_policies` pour objectiver l'état réel |
 | 10 | Mineur | `script.js`, erreurs réseau | Une erreur Postgres technique brute (ex. `p_items` malformé → "cannot get array length of a non-array") pouvait s'afficher telle quelle au client | **Appliqué** : seules les erreurs métier (code `P0001`, déjà rédigées en français) sont affichées ; sinon message générique |
@@ -82,10 +83,19 @@ que les 5 commandes de test n'existent plus si tu veux une confirmation définit
 1. ~~Exécuter `fix_drop_legacy_create_order.sql`~~ **Fait le 2026-10-04**, vérifié par API
 2. ~~Redéployer le site~~ **Fait le 2026-10-04**, vérifié (`.git`/SQL 404, en-têtes de sécurité actifs, code à jour)
 3. ~~Confirmer le nettoyage des données de test~~ **Fait**, vérifié dans le dashboard (les 5 commandes de test n'existent plus)
-4. Lancer `audit_inspect_db_state.sql` dans le SQL Editor et me partager le résultat pour que je
+4. ~~Implémenter les 3 correctifs "Important"~~ **Codé et committé localement le 2026-10-04** (#5, #6, #7).
+   **Reste à faire, dans cet ordre précis** :
+   1. Exécuter `migration_create_order_return_total.sql` dans le SQL Editor (change le type de
+      retour de `create_order()`)
+   2. Pousser les commits sur `main` et redéployer (`npx wrangler deploy --name=twist-pro-abidjan
+      --assets=. --compatibility-date=2026-09-30`)
+   — **si l'ordre est inversé** (déploiement avant la migration SQL), le nouveau `script.js`
+   lira `orderResult.total` sur une réponse qui est encore un simple `uuid` : la commande sera
+   quand même créée en base, mais la page plantera juste avant la redirection WhatsApp (total
+   `undefined`). Dis-moi quand tu veux que je m'en charge (je peux faire les deux étapes si tu me
+   redonnes le feu vert, comme pour le redéploiement précédent)
+5. Lancer `audit_inspect_db_state.sql` dans le SQL Editor et me partager le résultat pour que je
    compare policies/grants réels avec les fichiers du repo
-5. Me dire si j'implémente les 3 correctifs proposés mais pas appliqués : total WhatsApp recalculé
-   depuis le serveur (#5), purge du panier obsolète (#6), contraste du doré sur les prix (#7)
 6. Ajouter un `wrangler.toml` versionné pour rendre le déploiement reproductible (actuellement
    dépendant d'une config Cloudflare Dashboard non trackée) — maintenant qu'on connaît le nom
    exact du projet (`twist-pro-abidjan`) et sa date de compatibilité (`2026-09-30`), c'est facile à écrire
