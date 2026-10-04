@@ -83,17 +83,14 @@ que les 5 commandes de test n'existent plus si tu veux une confirmation définit
 1. ~~Exécuter `fix_drop_legacy_create_order.sql`~~ **Fait le 2026-10-04**, vérifié par API
 2. ~~Redéployer le site~~ **Fait le 2026-10-04**, vérifié (`.git`/SQL 404, en-têtes de sécurité actifs, code à jour)
 3. ~~Confirmer le nettoyage des données de test~~ **Fait**, vérifié dans le dashboard (les 5 commandes de test n'existent plus)
-4. ~~Implémenter les 3 correctifs "Important"~~ **Codé et committé localement le 2026-10-04** (#5, #6, #7).
-   **Reste à faire, dans cet ordre précis** :
-   1. Exécuter `migration_create_order_return_total.sql` dans le SQL Editor (change le type de
-      retour de `create_order()`)
-   2. Pousser les commits sur `main` et redéployer (`npx wrangler deploy --name=twist-pro-abidjan
-      --assets=. --compatibility-date=2026-09-30`)
-   — **si l'ordre est inversé** (déploiement avant la migration SQL), le nouveau `script.js`
-   lira `orderResult.total` sur une réponse qui est encore un simple `uuid` : la commande sera
-   quand même créée en base, mais la page plantera juste avant la redirection WhatsApp (total
-   `undefined`). Dis-moi quand tu veux que je m'en charge (je peux faire les deux étapes si tu me
-   redonnes le feu vert, comme pour le redéploiement précédent)
+4. ~~Implémenter les 3 correctifs "Important"~~ **Fait et déployé le 2026-10-04** (#5, #6, #7) :
+   `migration_create_order_return_total.sql` exécuté par le propriétaire, puis redéploiement
+   (même commande que précédemment). Revérifié : `script.js`/`style.css`/`index.html` servis
+   identiques au repo, la fonction `create_order` à 6 paramètres résout toujours correctement
+   (rejette un faux jeton Turnstile), `.git` toujours inaccessible, en-têtes de sécurité toujours
+   actifs. Seule la forme exacte du retour `{id, total}` n'a pas pu être revérifiée par API (un
+   appel réussi nécessite de passer Turnstile, impossible à simuler) — à confirmer par toi lors
+   d'une vraie commande
 5. Lancer `audit_inspect_db_state.sql` dans le SQL Editor et me partager le résultat pour que je
    compare policies/grants réels avec les fichiers du repo
 6. Ajouter un `wrangler.toml` versionné pour rendre le déploiement reproductible (actuellement
